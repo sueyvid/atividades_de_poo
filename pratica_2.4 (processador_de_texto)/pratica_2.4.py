@@ -23,7 +23,7 @@ class ContadorPalavras(PreProcessador):
         self._ocorrencias = dict()
     
     def processa(self):
-        PreProcessador.processa(self)
+        super().processa()
         for palavra in self._lista_palavras:
             if palavra not in self._ocorrencias:
                 self._ocorrencias[palavra] = self._lista_palavras.count(palavra)
@@ -44,7 +44,7 @@ class Tradutor(PreProcessador):
         self._lista_palavras_trad = list()
     
     def processa(self):
-        PreProcessador.processa(self)
+        super().processa()
         for palavra in self._lista_palavras:
             self._lista_palavras_trad.append(self._traducoes[palavra])
     
@@ -59,9 +59,8 @@ class ProcessadorTexto(ContadorPalavras, Tradutor):
         super().__init__(texto)
     
     def processa(self):
-        ContadorPalavras.processa(self)
+        super().processa()
         print(ContadorPalavras.__str__(self))
-        Tradutor.processa(self)
         print(Tradutor.__str__(self))
 
 if __name__ == '__main__':
