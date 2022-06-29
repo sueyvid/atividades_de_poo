@@ -31,6 +31,7 @@ class Calculadora(Interface):
                 self.num[f'{k}'] = tk.Button(self.master, text=f'{k}')
                 self.num[f'{k}'].grid(row=3-i, column=j, sticky='WE')
                 self.objetos.append(self.num[f'{k}'])
+                print(k)
                 k += 1
         
         self.num['0'] = tk.Button(self.master, text='0')
@@ -123,7 +124,13 @@ class Calculadora(Interface):
             obj['width'] = 4
             obj['height'] = 2
         # for i in range(9):
-        #     self.num[f'{i}']['command'] = lambda: print(i)
+        #     self.num[f'{i}']['command'] = lambda: print(i, self.num[f'{i}'])
+        # for i in range(9):
+        #     print(i)
+        #     i['command'] = lambda: print(int(f'{i}'))
+            # print(self.num[f'{i}']['text'])
+            # self.num[f'{i}']['command'] = lambda: print(self.num[f'{i}']['text'])
+        #     print(self.num[f'{i}'])
 
 def main():
     tela = tk.Tk()
