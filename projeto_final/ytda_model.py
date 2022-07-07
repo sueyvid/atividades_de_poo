@@ -1,3 +1,12 @@
+'''
+Análise de dados do Youtube (YTDA)
+Projeto final de POO - ECT/UFRN
+
+Módulo Model
+
+Prof. Bruno Silva
+'''
+
 import pandas as pd
 import graficos
 
@@ -129,7 +138,6 @@ class VideoYT:
     
     def __repr__(self):
         return f'VideoYT{self.id_video}'
-
 
 class BancoDadosYT:
     '''
