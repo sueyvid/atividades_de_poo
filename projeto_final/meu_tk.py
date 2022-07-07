@@ -1,0 +1,160 @@
+import tkinter as tk
+import tkinter.ttk as ttk
+from abc import ABC, abstractmethod
+
+
+class Posicionamento(ABC):
+    @abstractmethod
+    def __str__(self):
+        return 'Método abstrato'
+
+    def set_pack(self):
+        '''
+        Configura o posicionamento do widget
+        utilizando pack
+        '''
+        self.pack()
+
+    def set_grid(self, row, column):
+        '''
+        Configura o posicionamento do widget
+        utilizando grid, recebe os parâmetros
+        row e column
+        '''
+        self.grid(row=row, column=column)
+
+    def _posiciona(self, position=None, row=None, column=None):
+        '''
+        Define se o posicionamento do widget
+        será feito utilizando pack ou grid,
+        dependendo dos valores dos parâmetros
+        position, row e column
+        '''
+        if position is None and row is None and column is None:
+            self.set_pack()
+        elif isinstance(position, tuple):
+            self.set_grid(row=position[0], column=position[1])
+        elif isinstance(position, int) and row is not None and column is None:
+            self.set_grid(row=position, column=row)
+        elif row is not None and column is not None:
+            self.set_grid(row=row, column=column)
+
+class TextoDinamico:
+    def cria_var(self, texto_inicial=''):
+        '''
+        Cria um StringVar para ser usado
+        por um widget
+        '''
+        self._texto = tk.StringVar()
+        self._texto.set(texto_inicial)
+        return self._texto
+
+    @property
+    def texto(self):
+        return self._texto.get()
+    
+    @texto.setter
+    def texto(self, s):
+        self._texto.set(s)
+
+class Janela(tk.Tk):
+    def __init__(self, nome=None):
+        super().__init__()
+        self.title(nome)
+
+class Frame(tk.Frame, Posicionamento):
+    def __init__(self, root, position=None, row=None, column=None, bd=None, relief=None):
+        super().__init__(root, bd=bd, relief=relief)
+        super()._posiciona(row, column)
+
+class Label(tk.Label, TextoDinamico, Posicionamento):
+    def __init__(self, root, texto, position=None, row=None, column=None):
+        t = super().cria_var(texto)
+        super().__init__(root, textvariable=t)
+        super()._posiciona(position, row, column)
+
+    def font(self, fonte='', tamanho=None):
+        self['font'] = (fonte, tamanho)
+
+class Entry(tk.Entry, TextoDinamico, Posicionamento):
+    def __init__(self, root, position=None, row=None, column=None, texto=''):
+        t = super().cria_var(texto)
+        super().__init__(root, textvariable=t)
+        super()._posiciona(position, row, column)
+        
+    def font(self, fonte='', tamanho=None):
+        self['font'] = (fonte, tamanho)
+
+class Button(tk.Button, TextoDinamico, Posicionamento):
+    def __init__(self, root, texto, position=None, row=None, column=None):
+        t = super().cria_var(texto)
+        super().__init__(root, textvariable=t)
+        super()._posiciona(position, row, column)
+        
+    def font(self, fonte='', tamanho=None):
+        self['font'] = (fonte, tamanho)
+
+    def command(self, f):
+        self['command'] = f
+
+class TreeView(ttk.Treeview, Posicionamento):
+    def __init__(self, tela, colunas, titulos, tamanhos, position=None, row=None, column=None):
+        super().__init__(tela, columns=colunas, show='headings')
+
+        for i in range(len(colunas)):
+            self.heading(colunas[i], text=titulos[i])
+            self.column(colunas[i], width=tamanhos[i]+50, minwidth=tamanhos[i])
+
+        self.sb(tela)
+        super()._posiciona(position, row, column)
+
+    def sb(self, tela):
+        sb_y = ttk.Scrollbar(tela, orient=tk.VERTICAL, command=self.yview)
+        self.configure(yscroll=sb_y.set)
+
+        sb_x = ttk.Scrollbar(tela, orient=tk.HORIZONTAL, command=self.xview)
+        self.configure(xscroll=sb_x.set)
+
+        sb_y.grid(row=0, column=1, sticky='NS')
+        sb_x.grid(row=1, column=0, sticky='WE')
+
+    def insere(self, parent, pos, values):
+        self.insert(parent, pos, values=values)
+
+    def remove(self):
+        tup = self.selection()
+        index = list()
+        for i, v in enumerate(tup):
+            pos = tup[i]
+            index.append(self.index(pos))
+        for i, v in enumerate(tup):
+            self.delete(v)
+        return index
+
+def main():
+    janela = Janela('TreeView')
+
+    f = Frame(janela, 1, 0)
+    # Button(f, 'texto inicial')
+    # b = f.Button('texto inicial')
+    # b.texto = 'outro nome'
+    # l.texto = 'outro'
+    # l = LabelDinamico(f, 'texto inicial', 0, 0)
+    # l.text = '123'
+
+    f2 = Frame(janela, 0, 0)
+    col = ['col0', 'col1', 'col2']
+    tit = ['Titulo', 'Ano', 'Nota']
+    tam = [200, 40, 40]
+
+    treeview = TreeView(f2, col, tit, tam, (0,0))
+    for i in range(20):
+        treeview.insere('', 0, values=['nada', 'nada', 'nada'])
+
+    b = Button(f, 'remover', (0,0))
+    b.command(treeview.remove)
+
+    janela.mainloop()
+
+if __name__ == '__main__':
+    main()
