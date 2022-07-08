@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter.filedialog import askopenfilename
 from abc import ABC, abstractmethod
 
 
@@ -15,15 +16,15 @@ class Posicionamento(ABC):
         '''
         self.pack()
 
-    def set_grid(self, row, column):
+    def set_grid(self, row, column, sticky=None):
         '''
         Configura o posicionamento do widget
         utilizando grid, recebe os parâmetros
         row e column
         '''
-        self.grid(row=row, column=column)
+        self.grid(row=row, column=column, sticky=sticky)
 
-    def _posiciona(self, position=None, row=None, column=None):
+    def _posiciona(self, position=None, row=None, column=None, sticky=None):
         '''
         Define se o posicionamento do widget
         será feito utilizando pack ou grid,
@@ -33,11 +34,11 @@ class Posicionamento(ABC):
         if position is None and row is None and column is None:
             self.set_pack()
         elif isinstance(position, tuple):
-            self.set_grid(row=position[0], column=position[1])
+            self.set_grid(row=position[0], column=position[1], sticky=sticky)
         elif isinstance(position, int) and row is not None and column is None:
-            self.set_grid(row=position, column=row)
+            self.set_grid(row=position, column=row, sticky=sticky)
         elif row is not None and column is not None:
-            self.set_grid(row=row, column=column)
+            self.set_grid(row=row, column=column, sticky=sticky)
 
 class TextoDinamico:
     def cria_var(self, texto_inicial=''):
@@ -63,50 +64,68 @@ class Janela(tk.Tk):
         self.title(nome)
 
 class Frame(tk.Frame, Posicionamento):
-    def __init__(self, root, position=None, row=None, column=None, bd=None, relief=None):
+    def __init__(self, root, position=None, row=None, column=None, bd=None, relief=None, sticky=None):
         super().__init__(root, bd=bd, relief=relief)
-        super()._posiciona(row, column)
+        super()._posiciona(position, row, column, sticky)
 
-class Label(tk.Label, TextoDinamico, Posicionamento):
-    def __init__(self, root, texto, position=None, row=None, column=None):
+class ConfiguraWidget(TextoDinamico, Posicionamento):
+    def posiciona(self, position=None, row=None, column=None, sticky=None):
+        super()._posiciona(position, row, column, sticky)
+
+    def cria_texto_var(self, texto):
         t = super().cria_var(texto)
-        super().__init__(root, textvariable=t)
-        super()._posiciona(position, row, column)
+        return t
 
     def font(self, fonte='', tamanho=None):
         self['font'] = (fonte, tamanho)
 
-class Entry(tk.Entry, TextoDinamico, Posicionamento):
-    def __init__(self, root, position=None, row=None, column=None, texto=''):
-        t = super().cria_var(texto)
+class Label(tk.Label, ConfiguraWidget):
+    def __init__(self, root, texto, position=None, row=None, column=None, sticky=None):
+        t = self.cria_texto_var(texto)
         super().__init__(root, textvariable=t)
-        super()._posiciona(position, row, column)
-        
-    def font(self, fonte='', tamanho=None):
-        self['font'] = (fonte, tamanho)
+        self.posiciona(position, row, column, sticky)
 
-class Button(tk.Button, TextoDinamico, Posicionamento):
-    def __init__(self, root, texto, position=None, row=None, column=None):
-        t = super().cria_var(texto)
+class Entry(tk.Entry, ConfiguraWidget):
+    def __init__(self, root, position=None, row=None, column=None, texto='', sticky=None):
+        t = self.cria_texto_var(texto)
         super().__init__(root, textvariable=t)
-        super()._posiciona(position, row, column)
-        
-    def font(self, fonte='', tamanho=None):
-        self['font'] = (fonte, tamanho)
+        self.posiciona(position, row, column, sticky)
+
+class Button(tk.Button, ConfiguraWidget):
+    def __init__(self, root, texto, position=None, row=None, column=None, sticky=None):
+        t = self.cria_texto_var(texto)
+        super().__init__(root, textvariable=t)
+        self.posiciona(position, row, column, sticky)
 
     def command(self, f):
         self['command'] = f
 
+class ExploradorDeArquivo(ConfiguraWidget):
+    tipos_arq = (
+        ('Arquivos de texto', '*.txt'),
+        ('Todos os arquivos', '*.*')
+    )
+    def __init__(self, tipos, texto=''):
+        t = self.cria_texto_var(texto)
+        
+        nome_arq = askopenfilename(title='Abrir arquivo',\
+                                filetypes=tipos)
+        if nome_arq:
+            t.set(nome_arq)
+
+    def __str__(self):
+        return 'Explorador de Arquivos'
+
 class TreeView(ttk.Treeview, Posicionamento):
-    def __init__(self, tela, colunas, titulos, tamanhos, position=None, row=None, column=None):
+    def __init__(self, tela, colunas, titulos, tamanhos, position=None, row=None, column=None, sticky=None):
         super().__init__(tela, columns=colunas, show='headings')
 
         for i in range(len(colunas)):
             self.heading(colunas[i], text=titulos[i])
-            self.column(colunas[i], width=tamanhos[i]+50, minwidth=tamanhos[i])
+            self.column(colunas[i], width=tamanhos[i]-50, minwidth=tamanhos[i])
 
         self.sb(tela)
-        super()._posiciona(position, row, column)
+        super()._posiciona(position, row, column, sticky)
 
     def sb(self, tela):
         sb_y = ttk.Scrollbar(tela, orient=tk.VERTICAL, command=self.yview)
@@ -130,6 +149,10 @@ class TreeView(ttk.Treeview, Posicionamento):
         for i, v in enumerate(tup):
             self.delete(v)
         return index
+
+    def limpa(self):
+        for i in self.get_children():
+            self.delete(i)
 
 def main():
     janela = Janela('TreeView')
