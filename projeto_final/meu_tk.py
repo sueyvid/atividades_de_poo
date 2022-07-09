@@ -116,6 +116,30 @@ class ExploradorDeArquivo(ConfiguraWidget):
     def __str__(self):
         return 'Explorador de Arquivos'
 
+class ComboBox(ttk.Combobox, ConfiguraWidget):
+    def __init__(self, root, values, state='readonly', position=None, row=None, column=None, sticky=None):
+        t = self.cria_texto_var('')
+        super().__init__(root, textvariable=t, values=values, state=state)
+        self.posiciona(position, row, column, sticky)
+        self.bind('<<ComboboxSelected>>', self.mostra_selecao)
+
+    def mostra_selecao(self, event):
+        s = self._texto.get()
+        print(s)
+
+class Separator(ttk.Separator, Posicionamento):
+    def __init__(self, root, orient, position=None, row=None, column=None, sticky=None):
+        super().__init__(root, orient=orient)
+        self._posiciona(position, row, column, sticky)
+
+class RadioButton(tk.Radiobutton, ConfiguraWidget):
+    def __init__(self, root, texts, values, position=None, row=None, column=None, sticky=None):
+        t = self.cria_texto_var('')
+        for i in range(len(values)):
+            super().__init__(root, text=texts[i], value=values[i], variable=t)
+            self.set_grid(i, 0, sticky='W')
+
+
 class TreeView(ttk.Treeview, Posicionamento):
     def __init__(self, tela, colunas, titulos, tamanhos, position=None, row=None, column=None, sticky=None):
         super().__init__(tela, columns=colunas, show='headings')
