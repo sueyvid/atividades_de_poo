@@ -5,6 +5,8 @@ class BuscadorDeVideos(tk.Tk):
         super().__init__()
         self._config_tela()
 
+        self.botoes = dict()
+        self.widgets = dict()
         self.buttons = list()
         self.tv = None
 
@@ -12,7 +14,7 @@ class BuscadorDeVideos(tk.Tk):
 
     def _config_tela(self):
         self.title('Buscador de Vídeos')
-        self.minsize(380, 400)
+        self.minsize(720, 480)
         self.columnconfigure(0, weight=3)
         # self.columnconfigure(1, weight=1)
         self.rowconfigure(1, weight=1)
@@ -54,10 +56,14 @@ class BuscadorDeVideos(tk.Tk):
 
         # Dados
         datas = Frame(self, (1, 0), bd=10, relief=tk.SUNKEN, sticky='NSWE')
-        tabela = Frame(datas, (0, 0), sticky='NSWE')
+        nb = Notebook(datas, (0, 0), sticky='NSWE')
+        tabela = Frame(nb, (0, 0), sticky='NSWE')
+        grafico = Frame(nb, (0, 0), sticky='NSWE')
+        nb.adicionar_frame(tabela, 'Resultados')
+        nb.adicionar_frame(grafico, 'Gráficos')
         c, t, n = self._config_tv()
         self.tv = TreeView(tabela, c, t, n, (0, 0), sticky='NSWE')
-        infos = Frame(datas, (1, 0), sticky='NSWE')
+        infos = Frame(tabela, (2, 0), sticky='NSWE')
         l2 = Label(infos, 'Mostrando:', position=(0, 0))
         b2 = Button(infos, 'Mostrar mais', position=(0, 1))
         l3 = Label(infos, 'Tamanho da lista:', position=(0, 2))
@@ -71,11 +77,12 @@ class BuscadorDeVideos(tk.Tk):
         cb = ComboBox(configs, values=v, position=(1, 0))
         l5 = Label(configs, 'Digite algo...', (2, 0), sticky='W')
         sp = Separator(configs, orient='horizontal', position=(3, 0), sticky='WE')
-        l6 = Label(configs, 'Mostrar:', position=(4, 0), sticky='W')
+        l6 = Label(configs, 'Gráfico:', position=(4, 0), sticky='W')
         opcoes = Frame(configs, (5, 0), sticky='WE')
         t = ['mais assistidos', 'mais likes', 'mais comentários']
         v = ['assistidos', 'likes', 'comentários']
         rb = RadioButton(opcoes, t, v, (0, 0))
+        b6 = Button(configs, 'Mostrar gráfico', (6, 0))
         reset = Frame(frame_pad, (1, 0), sticky='S')
         b3 = Button(reset, 'Resetar', (0, 0))
         frame_pad.rowconfigure(1, weight=1)
@@ -83,6 +90,7 @@ class BuscadorDeVideos(tk.Tk):
 
         # for i in range(5):
         #     configs.rowconfigure(i, pad=10)
+        configs.rowconfigure(6, pad=10)
         configs.rowconfigure(1, pad=10)
         configs.rowconfigure(3, pad=10)
         configs.rowconfigure(4, pad=10)
@@ -100,6 +108,11 @@ class BuscadorDeVideos(tk.Tk):
         for widget in widgets_opcoes:
             widget.grid(padx=5, pady=5)
 
+        self.botoes['grafico'] = b6
+        self.widgets['arquivo'] = l7
+        self.botoes['importar'] = b5
+        self.widgets['tam_lista'] = l3
+        self.widgets['mostrando'] = l2
         b = [b1, b4, b5, l7]
         self.buttons.extend(b)
 

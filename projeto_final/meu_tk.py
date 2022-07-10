@@ -68,6 +68,14 @@ class Frame(tk.Frame, Posicionamento):
         super().__init__(root, bd=bd, relief=relief)
         super()._posiciona(position, row, column, sticky)
 
+class Notebook(ttk.Notebook, Posicionamento):
+    def __init__(self, root, position=None, row=None, column=None, sticky=None):
+        super().__init__(root)
+        super()._posiciona(position, row, column, sticky)
+
+    def adicionar_frame(self, frame, text):
+        self.add(frame, text=text)
+
 class ConfiguraWidget(TextoDinamico, Posicionamento):
     def posiciona(self, position=None, row=None, column=None, sticky=None):
         super()._posiciona(position, row, column, sticky)
@@ -102,6 +110,7 @@ class Button(tk.Button, ConfiguraWidget):
 
 class ExploradorDeArquivo(ConfiguraWidget):
     tipos_arq = (
+        ('Arquivo csv', '*.csv'),
         ('Arquivos de texto', '*.txt'),
         ('Todos os arquivos', '*.*')
     )
