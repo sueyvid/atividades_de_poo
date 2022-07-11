@@ -130,7 +130,7 @@ class ComboBox(ttk.Combobox, ConfiguraWidget):
         t = self.cria_texto_var('')
         super().__init__(root, textvariable=t, values=values, state=state)
         self.posiciona(position, row, column, sticky)
-        self.bind('<<ComboboxSelected>>', self.mostra_selecao)
+        # self.bind('<<ComboboxSelected>>', self.mostra_selecao)
 
     def mostra_selecao(self, event):
         s = self._texto.get()

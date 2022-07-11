@@ -12,12 +12,19 @@ class Controller:
         
     def _configura(self):
         self.view.buttons[1].command(self.insere_dados)
+        # cb.bind('<<ComboboxSelected>>', self.mostra_selecao)
+
+        bt_pesquisar = self.view.botoes['pesquisar']
+        bt_pesquisar.command(self.insere_dados)
 
         bt_importar_dados = self.view.botoes['importar']
         bt_importar_dados.command(self.importar_dados)
 
         bt_mostrar_grafico = self.view.botoes['grafico']
         bt_mostrar_grafico.command(self.mostrar_grafico)
+
+    # def pesquisar(self):
+
 
     def mostrar_grafico(self):
         self.model.mostra_mais_assistidos()
@@ -35,14 +42,21 @@ class Controller:
         self.insere_dados()
 
     def insere_dados(self):
+        cb = self.view.widgets['cb']
         self.view.tv.limpa()
-        res = self.model.todos()
 
-        exibe_tam_lista = self.view.widgets['tam_lista']
-        exibe_tam_lista.texto = f'Tamanho da lista: {len(res)}'
-        exibe_mostrando = self.view.widgets['mostrando']
-        exibe_mostrando.texto = f'Mostrando: {10}'
+        pesquisa = self.view.widgets['barra_pesquisa'].get()
+        if cb.texto == '':
+            res = self.model.todos()
+        if cb.texto == 'titulo':
+            res = self.model.busca_por_titulo(pesquisa)
+        if cb.texto == 'canal':
+            res = self.model.busca_por_canal(pesquisa)
+        if cb.texto == 'categoria':
+            res = self.model.busca_por_canal(pesquisa)
+            print(self.model.categorias)
 
+        n = 0
         # res = self.model.busca_por_periodo('2020-11-01', '2020-11-30')
         for i in range(len(res)):
             if i < 10:
@@ -52,6 +66,12 @@ class Controller:
                 views = res[i].cont_views
                 likes = res[i].likes
                 self.view.tv.insere('', 0, values=[id, titulo, canal, views, likes])
+                n += 1
+
+        exibe_tam_lista = self.view.widgets['tam_lista']
+        exibe_tam_lista.texto = f'Tamanho da lista: {len(res)}'
+        exibe_mostrando = self.view.widgets['mostrando']
+        exibe_mostrando.texto = f'Mostrando: {n}'
     
 def main():
     v = BuscadorDeVideos()

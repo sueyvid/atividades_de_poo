@@ -7,6 +7,7 @@ class BuscadorDeVideos(tk.Tk):
 
         self.botoes = dict()
         self.widgets = dict()
+        self.frames = dict()
         self.buttons = list()
         self.tv = None
 
@@ -46,6 +47,21 @@ class BuscadorDeVideos(tk.Tk):
         n = [100, 400, 200, 100, 100]
         return c, t, n
 
+    def cb_opcao(self, event):
+        cb_frame = self.frames['cb_frame']
+        cb = self.widgets['cb']
+        l5 = self.widgets['tipo_pesquisa']
+        l5.texto = ''
+        if cb.texto == '':
+            l5.texto = 'Escolha o tipo de pesquisa...'
+        elif cb.texto == 'titulo':
+            l5.texto = 'Digite o título na barra de pesquisa.'
+        elif cb.texto == 'canal':
+            l5.texto = 'Digite o nome do canal na barra de pesquisa.'
+        elif cb.texto == 'categoria':
+            e1 = Entry(cb_frame, (1, 0), sticky='W')
+            # Label(configs, 'Digite o nome do canal na barra de pesquisa.', (2, 0), sticky='W')
+
     def draw(self):
         # Barra de pesquisa
         form = Frame(self, (0, 0), bd=10, relief=tk.SUNKEN, sticky='NSWE')
@@ -75,7 +91,9 @@ class BuscadorDeVideos(tk.Tk):
         l4 = Label(configs, 'Pesquisar por:', (0, 0), sticky='W')
         v = ['titulo', 'canal', 'categoria', 'periodo']
         cb = ComboBox(configs, values=v, position=(1, 0))
-        l5 = Label(configs, 'Digite algo...', (2, 0), sticky='W')
+        cb.bind('<<ComboboxSelected>>', self.cb_opcao)
+        cb_frame = Frame(configs, (2, 0), sticky='W')
+        l5 = Label(cb_frame, 'Escolha o tipo de pesquisa...', (0, 0), sticky='W')
         sp = Separator(configs, orient='horizontal', position=(3, 0), sticky='WE')
         l6 = Label(configs, 'Gráfico:', position=(4, 0), sticky='W')
         opcoes = Frame(configs, (5, 0), sticky='WE')
@@ -113,6 +131,11 @@ class BuscadorDeVideos(tk.Tk):
         self.botoes['importar'] = b5
         self.widgets['tam_lista'] = l3
         self.widgets['mostrando'] = l2
+        self.botoes['pesquisar'] = b1
+        self.widgets['barra_pesquisa'] = e1
+        self.widgets['cb'] = cb
+        self.frames['cb_frame'] = cb_frame
+        self.widgets['tipo_pesquisa'] = l5
         b = [b1, b4, b5, l7]
         self.buttons.extend(b)
 
