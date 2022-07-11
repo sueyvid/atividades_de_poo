@@ -141,13 +141,22 @@ class Separator(ttk.Separator, Posicionamento):
         super().__init__(root, orient=orient)
         self._posiciona(position, row, column, sticky)
 
-class RadioButton(tk.Radiobutton, ConfiguraWidget):
+class RadioButton(TextoDinamico):
     def __init__(self, root, texts, values, position=None, row=None, column=None, sticky=None):
         t = self.cria_texto_var('')
+        self.rb = list()
         for i in range(len(values)):
-            super().__init__(root, text=texts[i], value=values[i], variable=t)
-            self.set_grid(i, 0, sticky='W')
-
+            r = ttk.Radiobutton(root, text=texts[i], value=values[i], variable=t)
+            r.grid(row=i, column=0, sticky='W')
+            self.rb.append(r)
+            # self.set_grid(i, 0, sticky='W')
+    
+    def cria_texto_var(self, texto):
+        t = super().cria_var(texto)
+        return t
+    
+    def retorna_rb(self):
+        return self.rb
 
 class TreeView(ttk.Treeview, Posicionamento):
     def __init__(self, tela, colunas, titulos, tamanhos, position=None, row=None, column=None, sticky=None):

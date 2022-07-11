@@ -163,7 +163,13 @@ class BancoDadosYT:
         try:
             print(f'Abrindo arquivo {nome_arq}')
             self._nome = nome_arq
+            # self._df = pd.read_csv(nome_arq, header=0, chunksize = 5)
+            # for i in self._df:
+            #     print(i.shape)
             self._df = pd.read_csv(nome_arq)
+            # self._df = pd.read_csv(nome_arq, nrows=0, header=0, chunksize=10)
+            # tp = pd.read_csv(nome_arq, chunksize=10)
+            # self._df = pd.concat(tp, ignore_index=True)
         except FileNotFoundError as err:
             print(err)
             raise err # levanta exc. novamente para ser tratada em outro módulo
@@ -171,6 +177,11 @@ class BancoDadosYT:
             ## altera tipo da coluna
             self._df.dt_publicacao = pd.to_datetime(self._df.dt_publicacao)
             self._df.dt_trending = pd.to_datetime(self._df.dt_trending)
+
+    # def carrega(self):
+    #     nome_arq = self._nome
+    #     tp = pd.read_csv(nome_arq, nrows=10, skiprows=10, iterator=True, chunksize=10)
+    #     self._df = pd.concat(tp, ignore_index=True)
 
     def _df_para_lista(self, df):
         '''
@@ -326,19 +337,21 @@ def imprime_resultado(res):
         print(v)
 
 def main():
-    bd = BancoDadosYT('BR_youtube_trending_data_p1.csv')
+    # bd = BancoDadosYT('BR_youtube_trending_data_p1.csv')
+    bd = BancoDadosYT('BR_youtube_trending_data_completo.csv')
+
     #bd.imprime_info()
-    print(f'Arquivo: {bd.nome}')
-    print(f'Total de vídeos: {bd.total}')
-    print(f'Categorias no banco de dados: {bd.categorias}')
+    # print(f'Arquivo: {bd.nome}')
+    # print(f'Total de vídeos: {bd.total}')
+    # print(f'Categorias no banco de dados: {bd.categorias}')
     
     #res = bd.busca_por_titulo('fla')
     #res = bd.busca_por_canal('espor')
     #res = bd.busca_por_categoria('SPORTS')
-    res = bd.busca_por_periodo('2020-11-01', '2020-11-30')
+    # res = bd.busca_por_periodo('2020-11-01', '2020-11-30')
 
-    print('\nResultado da busca:')
-    imprime_resultado(res)
+    # print('\nResultado da busca:')
+    # imprime_resultado(res)
 
     #bd.mostra_mais_assistidos()
     #bd.mostra_mais_likes()
