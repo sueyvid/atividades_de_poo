@@ -3,8 +3,9 @@ from meu_tk import *
 class BuscadorDeVideos(tk.Tk):
     def __init__(self):
         super().__init__()
-        self._config_tela()
+        self._configs_iniciais()
 
+        # Atributos públicos
         self.botoes = dict()
         self.widgets = dict()
         self.frames = dict()
@@ -12,11 +13,10 @@ class BuscadorDeVideos(tk.Tk):
 
         self.draw()
 
-    def _config_tela(self):
+    def _configs_iniciais(self):
         self.title('Buscador de Vídeos')
         self.minsize(720, 480)
         self.columnconfigure(0, weight=3)
-        # self.columnconfigure(1, weight=1)
         self.rowconfigure(1, weight=1)
 
     def draw(self):
@@ -51,7 +51,9 @@ class BuscadorDeVideos(tk.Tk):
         cb.bind('<<ComboboxSelected>>', self.cb_opcao)
         cb_frame = Frame(configs, (2, 0), sticky='W')
         l5 = Label(cb_frame, 'Escolha o tipo de pesquisa...', (0, 0), sticky='W')
-        sp = Separator(configs, orient='horizontal', position=(3, 0), sticky='WE')
+
+        Separator(configs, orient='horizontal', position=(3, 0), sticky='WE')
+
         l6 = Label(configs, 'Gráfico:', position=(4, 0), sticky='W')
         opcoes = Frame(configs, (5, 0), sticky='WE')
         t = ['mais assistidos', 'mais likes', 'mais comentários']
@@ -65,12 +67,11 @@ class BuscadorDeVideos(tk.Tk):
         # Opções
         opcoes = Frame(self, (2, 0), bd=10, relief=tk.SUNKEN, sticky='NSWE')
         l7 = Label(opcoes, 'Arquivo: ', (0, 0), sticky='W')
-        # b4 = Button(opcoes, 'Inserir dados', (0, 1))
         b5 = Button(opcoes, 'Importar dados', (0, 1))
         opcoes.grid(columnspan=2)
         opcoes.columnconfigure(0, weight=1)
 
-        # Atributos públicos
+        # Define atributos públicos
         widgets_opcoes = opcoes.winfo_children()
         for widget in widgets_opcoes:
             widget.grid(padx=5, pady=5)
@@ -89,7 +90,7 @@ class BuscadorDeVideos(tk.Tk):
         self.widgets['rb'] = rb
         self.botoes['mais'] = b2
 
-        widgets_font = [l1, e1] + widgets_opcoes + [l4, l6, cb]
+        widgets_font = [l1, e1] + [b5] + [l4, l6, cb]
         b1.font('', 13)
         self._configura_widgets(widgets_font)
 

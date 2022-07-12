@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 class Posicionamento(ABC):
     @abstractmethod
     def __str__(self):
-        return 'Método abstrato'
+        pass
 
     def set_pack(self):
         '''
@@ -58,54 +58,92 @@ class TextoDinamico:
     def texto(self, s):
         self._texto.set(s)
 
+class ConfiguraWidget(TextoDinamico, Posicionamento):
+    def posiciona(self, position=None, row=None, column=None, sticky=None):
+        '''
+        Posiciona o widget
+        '''
+        super()._posiciona(position, row, column, sticky)
+
+    def cria_texto_var(self, texto):
+        '''
+        Cria uma variável StringVar do tk
+        '''
+        t = super().cria_var(texto)
+        return t
+
+    def font(self, fonte='', tamanho=None):
+        '''
+        Formata a fonte do widget
+        '''
+        self['font'] = (fonte, tamanho)
+
 class Janela(tk.Tk):
     def __init__(self, nome=None):
+        '''
+        Cria uma janela tk
+        '''
         super().__init__()
         self.title(nome)
 
 class Frame(tk.Frame, Posicionamento):
     def __init__(self, root, position=None, row=None, column=None, bd=None, relief=None, sticky=None):
+        '''
+        Cria um frame tk
+        '''
         super().__init__(root, bd=bd, relief=relief)
         super()._posiciona(position, row, column, sticky)
 
 class Notebook(ttk.Notebook, Posicionamento):
     def __init__(self, root, position=None, row=None, column=None, sticky=None):
+        '''
+        Cria um notebook tk
+        '''
         super().__init__(root)
         super()._posiciona(position, row, column, sticky)
 
     def adicionar_frame(self, frame, text):
+        '''
+        Adiciona um frame ao notebook
+        '''
         self.add(frame, text=text)
-
-class ConfiguraWidget(TextoDinamico, Posicionamento):
-    def posiciona(self, position=None, row=None, column=None, sticky=None):
-        super()._posiciona(position, row, column, sticky)
-
-    def cria_texto_var(self, texto):
-        t = super().cria_var(texto)
-        return t
-
-    def font(self, fonte='', tamanho=None):
-        self['font'] = (fonte, tamanho)
 
 class Label(tk.Label, ConfiguraWidget):
     def __init__(self, root, texto, position=None, row=None, column=None, sticky=None):
+        '''
+        Cria um Label tk com uma
+        StringVar associada
+        '''
         t = self.cria_texto_var(texto)
         super().__init__(root, textvariable=t)
         self.posiciona(position, row, column, sticky)
 
 class Entry(tk.Entry, ConfiguraWidget):
     def __init__(self, root, position=None, row=None, column=None, texto='', sticky=None):
+        '''
+        Cria um Entry tk com uma
+        StringVar associada
+        '''
         t = self.cria_texto_var(texto)
         super().__init__(root, textvariable=t)
         self.posiciona(position, row, column, sticky)
 
 class Button(tk.Button, ConfiguraWidget):
     def __init__(self, root, texto, position=None, row=None, column=None, sticky=None):
+        '''
+        Cria um Button tk com uma
+        StringVar associada
+        '''
         t = self.cria_texto_var(texto)
         super().__init__(root, textvariable=t)
         self.posiciona(position, row, column, sticky)
 
     def command(self, f):
+        '''
+        Define qual função será chamada
+        ao clicar no botão, passando-a
+        como parâmetro
+        '''
         self['command'] = f
 
 class ExploradorDeArquivo(ConfiguraWidget):
@@ -115,6 +153,11 @@ class ExploradorDeArquivo(ConfiguraWidget):
         ('Todos os arquivos', '*.*')
     )
     def __init__(self, tipos, texto=''):
+        '''
+        Abre o buscador do windows e
+        armazena o nome do arquivo em
+        uma StringVar
+        '''
         t = self.cria_texto_var(texto)
         
         nome_arq = askopenfilename(title='Abrir arquivo',\
@@ -125,51 +168,62 @@ class ExploradorDeArquivo(ConfiguraWidget):
     def __str__(self):
         return 'Explorador de Arquivos'
 
-class ComboBox(ttk.Combobox, ConfiguraWidget):
-    def __init__(self, root, values, state='readonly', position=None, row=None, column=None, sticky=None):
-        t = self.cria_texto_var('')
-        super().__init__(root, textvariable=t, values=values, state=state)
-        self.posiciona(position, row, column, sticky)
-        # self.bind('<<ComboboxSelected>>', self.mostra_selecao)
-
-    def mostra_selecao(self, event):
-        s = self._texto.get()
-        print(s)
-
 class Separator(ttk.Separator, Posicionamento):
     def __init__(self, root, orient, position=None, row=None, column=None, sticky=None):
+        '''
+        Cria um Separator tk
+        '''
         super().__init__(root, orient=orient)
         self._posiciona(position, row, column, sticky)
 
+class ComboBox(ttk.Combobox, ConfiguraWidget):
+    def __init__(self, root, values, state='readonly', position=None, row=None, column=None, sticky=None):
+        '''
+        Cria um Combobox tk com uma
+        Stringvar associada
+        '''
+        t = self.cria_texto_var('')
+        super().__init__(root, textvariable=t, values=values, state=state)
+        self.posiciona(position, row, column, sticky)
+
 class RadioButton(TextoDinamico):
     def __init__(self, root, texts, values, position=None, row=None, column=None, sticky=None):
-        t = self.cria_texto_var('')
+        '''
+        Cria um ou mais RadioButton
+        em um frame com uma StringVar
+        associada
+        '''
+        t = self.cria_var('')
         self.rb = list()
         for i in range(len(values)):
             r = ttk.Radiobutton(root, text=texts[i], value=values[i], variable=t)
             r.grid(row=i, column=0, sticky='W')
             self.rb.append(r)
-            # self.set_grid(i, 0, sticky='W')
-    
-    def cria_texto_var(self, texto):
-        t = super().cria_var(texto)
-        return t
     
     def retorna_rb(self):
+        '''
+        Retorna a lista de RadioButton
+        que foram criados
+        '''
         return self.rb
 
 class TreeView(ttk.Treeview, Posicionamento):
     def __init__(self, tela, colunas, titulos, tamanhos, position=None, row=None, column=None, sticky=None):
+        '''
+        Cria um Treeview tk com as
+        chaves e os titulos sendo passados
+        como listas nos parâmetros
+        '''
         super().__init__(tela, columns=colunas, show='headings')
 
         for i in range(len(colunas)):
             self.heading(colunas[i], text=titulos[i])
             self.column(colunas[i], width=tamanhos[i]-50, minwidth=tamanhos[i])
 
-        self.sb(tela)
+        self._sb(tela)
         super()._posiciona(position, row, column, sticky)
 
-    def sb(self, tela):
+    def _sb(self, tela):
         sb_y = ttk.Scrollbar(tela, orient=tk.VERTICAL, command=self.yview)
         self.configure(yscroll=sb_y.set)
 
@@ -180,9 +234,17 @@ class TreeView(ttk.Treeview, Posicionamento):
         sb_x.grid(row=1, column=0, sticky='WE')
 
     def insere(self, parent, pos, values):
+        '''
+        Insere linha na Treeview
+        recebendo posição e valor
+        '''
         self.insert(parent, pos, values=values)
 
     def remove(self):
+        '''
+        Remove linha que tiver sido
+        selecionada na Treeview
+        '''
         tup = self.selection()
         index = list()
         for i, v in enumerate(tup):
@@ -193,33 +255,9 @@ class TreeView(ttk.Treeview, Posicionamento):
         return index
 
     def limpa(self):
+        '''
+        Remove todas as linhas de dados
+        da Treeview
+        '''
         for i in self.get_children():
             self.delete(i)
-
-def main():
-    janela = Janela('TreeView')
-
-    f = Frame(janela, 1, 0)
-    # Button(f, 'texto inicial')
-    # b = f.Button('texto inicial')
-    # b.texto = 'outro nome'
-    # l.texto = 'outro'
-    # l = LabelDinamico(f, 'texto inicial', 0, 0)
-    # l.text = '123'
-
-    f2 = Frame(janela, 0, 0)
-    col = ['col0', 'col1', 'col2']
-    tit = ['Titulo', 'Ano', 'Nota']
-    tam = [200, 40, 40]
-
-    treeview = TreeView(f2, col, tit, tam, (0,0))
-    for i in range(20):
-        treeview.insere('', 0, values=['nada', 'nada', 'nada'])
-
-    b = Button(f, 'remover', (0,0))
-    b.command(treeview.remove)
-
-    janela.mainloop()
-
-if __name__ == '__main__':
-    main()
