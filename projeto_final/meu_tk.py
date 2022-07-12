@@ -220,6 +220,7 @@ class TreeView(ttk.Treeview, Posicionamento):
             self.heading(colunas[i], text=titulos[i])
             self.column(colunas[i], width=tamanhos[i]-50, minwidth=tamanhos[i])
 
+        self._scroll_y = None
         self._sb(tela)
         super()._posiciona(position, row, column, sticky)
 
@@ -232,6 +233,11 @@ class TreeView(ttk.Treeview, Posicionamento):
 
         sb_y.grid(row=0, column=1, sticky='NS')
         sb_x.grid(row=1, column=0, sticky='WE')
+
+        self._scroll_y = sb_y
+
+    def retorna_scroll_y(self):
+        return self._scroll_y
 
     def insere(self, parent, pos, values):
         '''

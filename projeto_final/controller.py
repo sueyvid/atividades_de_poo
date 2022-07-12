@@ -11,6 +11,7 @@ class Controller:
         self.fila = None
         self.qtd_mostrando = 0
         self.arquivo = None
+        self.scroll_y_position = None
 
     def inicia(self, view):
         self.view = view
@@ -31,6 +32,20 @@ class Controller:
 
         bt_mostrar_mais = self.view.botoes['mais']
         bt_mostrar_mais.command(self.adiciona_na_lista)
+
+        # Scroll da tabela
+        scroll_y = self.view.widgets['scroll_y']
+        scroll_y.bind('<MouseWheel>', self.confere_valor_scroll)
+        self.view.tv.bind('<MouseWheel>', self.confere_valor_scroll)
+        self.view.bind('<Motion>', self.confere_valor_scroll)
+        self.scroll_y_position = tk.StringVar()
+
+    def confere_valor_scroll(self, event=None):
+        if self.arquivo:
+            scroll_y = self.view.widgets['scroll_y'].get()
+            self.scroll_y_position.set(scroll_y[1])
+            if self.scroll_y_position.get() == '1.0':
+                self.adiciona_na_lista()
 
     def resetar(self):
         cb = self.view.widgets['cb']
@@ -111,7 +126,7 @@ class Controller:
             exibe_tam_lista = self.view.widgets['tam_lista']
             exibe_tam_lista.texto = f'Tamanho da lista: {len(res)}'
 
-    def adiciona_na_lista(self):
+    def adiciona_na_lista(self, event=None):
         if self.arquivo:
             res = self.fila
             self.qtd_mostrando
@@ -122,7 +137,7 @@ class Controller:
                     canal = res[i].canal
                     views = res[i].cont_views
                     likes = res[i].likes
-                    self.view.tv.insere('', tk.END, values=[id, titulo, canal, views, likes])
+                    self.view.tv.insere('', tk.END, values=[titulo, canal, views, likes])
                     self.qtd_mostrando += 1
             for i in range(len(res)):
                 if i < 5:

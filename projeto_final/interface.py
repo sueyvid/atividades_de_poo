@@ -41,6 +41,7 @@ class BuscadorDeVideos(tk.Tk):
         b2 = Button(infos, 'Mostrar mais', position=(0, 1))
         l3 = Label(infos, 'Tamanho da lista:', position=(0, 2))
         self._config_datas(datas, tabela, infos)
+        scroll_y = self.tv.retorna_scroll_y()
 
         # Configurações
         frame_pad = Frame(self, (0, 1), bd=10, relief=tk.SUNKEN, sticky='NSWE')
@@ -89,6 +90,7 @@ class BuscadorDeVideos(tk.Tk):
         self.botoes['resetar'] = b3
         self.widgets['rb'] = rb
         self.botoes['mais'] = b2
+        self.widgets['scroll_y'] = scroll_y
 
         widgets_font = [l1, e1] + [b5] + [l4, l6, cb]
         b1.font('', 13)
@@ -121,9 +123,9 @@ class BuscadorDeVideos(tk.Tk):
         infos.columnconfigure(2, weight=1)
 
     def _config_tv(self):
-        c = ['col0', 'col1', 'col2', 'col3', 'col4']
-        t = ['Id', 'Titulo', 'Canal', 'Views', 'Likes']
-        n = [100, 400, 200, 100, 100]
+        c = ['col0', 'col1', 'col2', 'col3']
+        t = ['Titulo', 'Canal', 'Views', 'Likes']
+        n = [400, 200, 100, 100]
         return c, t, n
 
     def _config_configs(self, configs, frame_pad, reset):
