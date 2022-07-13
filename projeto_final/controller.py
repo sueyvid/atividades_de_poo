@@ -1,6 +1,8 @@
+from setuptools import Command
 from Excecoes import *
 from interface import *
 from modelo import *
+from data import *
 from tkinter.messagebox import showerror
 
 class Controller:
@@ -8,10 +10,12 @@ class Controller:
         self.view = None
         self.model = None
 
+        self.lista = None
         self.fila = None
         self.qtd_mostrando = 0
         self.arquivo = None
         self.scroll_y_position = None
+        self.ordenacao = None
 
     def inicia(self, view):
         self.view = view
@@ -33,12 +37,92 @@ class Controller:
         bt_mostrar_mais = self.view.botoes['mais']
         bt_mostrar_mais.command(self.adiciona_na_lista)
 
+        # Ordenação
+        self.ordenacao = tk.StringVar()
+        self.crescente = tk.BooleanVar(value=False)
+        self.view.tv.heading('col0', command=lambda:self.ordena('titulo'))
+        self.view.tv.heading('col1', command=lambda:self.ordena('canal'))
+        self.view.tv.heading('col2', command=lambda:self.ordena('views'))
+        self.view.tv.heading('col3', command=lambda:self.ordena('likes'))
+
         # Scroll da tabela
         scroll_y = self.view.widgets['scroll_y']
         scroll_y.bind('<MouseWheel>', self.confere_valor_scroll)
         self.view.tv.bind('<MouseWheel>', self.confere_valor_scroll)
         self.view.bind('<Motion>', self.confere_valor_scroll)
         self.scroll_y_position = tk.StringVar()
+
+        cb = self.view.widgets['cb']
+        cb.bind('<<ComboboxSelected>>', self.cb_opcao)
+
+    def cb_opcao(self, event):
+        cb = self.view.widgets['cb']
+        l5 = self.view.widgets['tipo_pesquisa']
+        l5.texto = ''
+        if cb.texto == '':
+            l5.texto = 'Escolha o tipo de pesquisa...'
+        elif cb.texto == 'titulo':
+            l5.texto = 'Digite o título na barra de pesquisa.'
+        elif cb.texto == 'canal':
+            l5.texto = 'Digite o nome do canal na barra de pesquisa.'
+        elif cb.texto == 'periodo':
+            l5.texto = 'Digite: "dd/mm/aaaa - dd/mm/aaaa"'
+        elif cb.texto == 'categoria':
+            s = 'Digite uma das categorias:\n'
+            for i in self.model.categorias:
+                s += f'{i}\n'
+            l5.texto = s
+
+    def reseta_ordenacoes(self):
+        self.view.tv.heading('col0', text='Titulo')
+        self.view.tv.heading('col1', text='Canal')
+        self.view.tv.heading('col2', text='Views')
+        self.view.tv.heading('col3', text='Likes')
+
+    def ordena(self, tipo):
+        if self.arquivo:
+            self.reseta_ordenacoes()
+            if not self.crescente.get():
+                if tipo == 'titulo':
+                    self.ordenacao.set('titulo')
+                    self.lista.sort(key=lambda x: x.titulo)
+                    self.view.tv.heading('col0', text='Titulo 🔽')
+                elif tipo == 'canal':
+                    self.ordenacao.set('canal')
+                    self.lista.sort(key=lambda x: x.canal)
+                    self.view.tv.heading('col1', text='Canal 🔽')
+                elif tipo == 'views':
+                    self.ordenacao.set('views')
+                    self.lista.sort(key=lambda x: x.cont_views)
+                    self.view.tv.heading('col2', text='Views 🔽')
+                elif tipo == 'likes':
+                    self.ordenacao.set('likes')
+                    self.lista.sort(key=lambda x: x.likes)
+                    self.view.tv.heading('col3', text='Likes 🔽')
+                self.crescente.set(True)
+            else:
+                if tipo == 'titulo':
+                    self.ordenacao.set('titulo')
+                    self.lista.sort(key=lambda x: x.titulo)
+                    self.view.tv.heading('col0', text='Titulo 🔼')
+                elif tipo == 'canal':
+                    self.ordenacao.set('canal')
+                    self.lista.sort(key=lambda x: x.canal)
+                    self.view.tv.heading('col1', text='Canal 🔼')
+                elif tipo == 'views':
+                    self.ordenacao.set('views')
+                    self.lista.sort(key=lambda x: x.cont_views)
+                    self.view.tv.heading('col2', text='Views 🔼')
+                elif tipo == 'likes':
+                    self.ordenacao.set('likes')
+                    self.lista.sort(key=lambda x: x.likes)
+                    self.view.tv.heading('col3', text='Likes 🔼')
+                self.lista.reverse()
+                self.crescente.set(False)
+            self.fila = self.lista.copy()
+            self.view.tv.limpa()
+            self.qtd_mostrando = 0
+            self.adiciona_na_lista()
 
     def confere_valor_scroll(self, event=None):
         if self.arquivo:
@@ -100,6 +184,7 @@ class Controller:
             self.insere_dados()
 
     def insere_dados(self):
+        self.reseta_ordenacoes()
         cb = self.view.widgets['cb']
 
         pesquisa = self.view.widgets['barra_pesquisa'].get()
@@ -113,13 +198,18 @@ class Controller:
         elif cb.texto == 'canal':
             res = self.model.busca_por_canal(pesquisa)
         elif cb.texto == 'categoria':
-            res = self.model.busca_por_canal(pesquisa)
-            print(self.model.categorias)
+            res = self.model.busca_por_categoria(pesquisa)
+        elif cb.texto == 'periodo':
+            p = Periodo(pesquisa)
+            di = p.data_inicial()
+            df = p.data_final()
+            res = self.model.busca_por_periodo(di, df)
         if not res:
             AvisoSemResultados()
         else:
             self.qtd_mostrando = 0
             self.view.tv.limpa()
+            self.lista = res
             self.fila = res.copy()
             self.adiciona_na_lista()
 
@@ -132,7 +222,6 @@ class Controller:
             self.qtd_mostrando
             for i in range(len(res)):
                 if i < 5:
-                    id = res[i].id_video
                     titulo = res[i].titulo
                     canal = res[i].canal
                     views = res[i].cont_views

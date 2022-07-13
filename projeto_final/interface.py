@@ -140,19 +140,7 @@ class BuscadorDeVideos(tk.Tk):
         frame_pad.grid(rowspan=2)
 
     def cb_opcao(self, event):
-        cb_frame = self.frames['cb_frame']
-        cb = self.widgets['cb']
-        l5 = self.widgets['tipo_pesquisa']
-        l5.texto = ''
-        if cb.texto == '':
-            l5.texto = 'Escolha o tipo de pesquisa...'
-        elif cb.texto == 'titulo':
-            l5.texto = 'Digite o título na barra de pesquisa.'
-        elif cb.texto == 'canal':
-            l5.texto = 'Digite o nome do canal na barra de pesquisa.'
-        elif cb.texto == 'categoria':
-            # Label(configs, 'Digite o nome do canal na barra de pesquisa.', (2, 0), sticky='W')
-            e1 = Entry(cb_frame, (1, 0), sticky='W')
+        pass
 
 def main():
     v = BuscadorDeVideos()

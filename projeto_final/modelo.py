@@ -163,13 +163,7 @@ class BancoDadosYT:
         try:
             print(f'Abrindo arquivo {nome_arq}')
             self._nome = nome_arq
-            # self._df = pd.read_csv(nome_arq, header=0, chunksize = 5)
-            # for i in self._df:
-            #     print(i.shape)
-            self._df = pd.read_csv(nome_arq)
-            # self._df = pd.read_csv(nome_arq, nrows=0, header=0, chunksize=10)
-            # tp = pd.read_csv(nome_arq, chunksize=10)
-            # self._df = pd.concat(tp, ignore_index=True)
+            self._df = pd.read_csv(nome_arq, keep_default_na=False)
         except FileNotFoundError as err:
             print(err)
             raise err # levanta exc. novamente para ser tratada em outro módulo
@@ -177,11 +171,8 @@ class BancoDadosYT:
             ## altera tipo da coluna
             self._df.dt_publicacao = pd.to_datetime(self._df.dt_publicacao)
             self._df.dt_trending = pd.to_datetime(self._df.dt_trending)
-
-    # def carrega(self):
-    #     nome_arq = self._nome
-    #     tp = pd.read_csv(nome_arq, nrows=10, skiprows=10, iterator=True, chunksize=10)
-    #     self._df = pd.concat(tp, ignore_index=True)
+            self._df.cont_views = pd.to_numeric(self._df.cont_views)
+            self._df.likes = pd.to_numeric(self._df.likes)
 
     def _df_para_lista(self, df):
         '''
