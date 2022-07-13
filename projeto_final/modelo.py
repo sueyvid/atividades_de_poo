@@ -1,3 +1,4 @@
+from datetime import date
 import pandas as pd
 import graficos
 
@@ -163,7 +164,8 @@ class BancoDadosYT:
         try:
             print(f'Abrindo arquivo {nome_arq}')
             self._nome = nome_arq
-            self._df = pd.read_csv(nome_arq, keep_default_na=False)
+            self._df = pd.read_csv(nome_arq)
+            self._df = self._df[self._df['categoria'].notna()]
         except FileNotFoundError as err:
             print(err)
             raise err # levanta exc. novamente para ser tratada em outro módulo
