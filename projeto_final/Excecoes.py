@@ -1,10 +1,12 @@
 from tkinter.messagebox import showerror, showinfo
 
+from matplotlib.pyplot import show
+
 class ExcecaoSistema(Exception):
     '''Classe de exceções do sistema'''
     pass
 
-class GraficoSelecao(ExcecaoSistema):
+class OpcaoNaoSelecionada(ExcecaoSistema):
     '''
     Erro quando não houver nenhuma
     opção selecionada para exibição
@@ -19,20 +21,37 @@ class ArquivoNaoSelecionado(ExcecaoSistema):
     '''
     pass
 
-def ErroGraficoSelecao():
-    showerror('Tipo de gráfico não selecionado', 'Algum dos tipos de gráficos deve ser selecionado.')
+class PesquisaVazio(ExcecaoSistema):
+    '''
+    Erro quando se tenta pesquisar sem ter
+    digitado nada na caixa de busca
+    '''
+    pass
+
+class NadaEncontrado(ExcecaoSistema):
+    '''
+    Erro quando nenhum dado com os valores
+    passados é encontrado
+    '''
+    pass
 
 def ErroArquivoNaoSelecionado():
     showerror('Arquivo não selecionado', 'Nenhum arquivo foi selecionado para leitura.')
 
-def AvisoArquivoNaoSelecionado():
-    showinfo('Nenhum arquivo selecionado', 'Nenhum arquivo foi selecionado no explorador de arquivos.')
+def ErroOpcaoNaoSelecionada(text):
+    showerror('Nenhuma opção foi selecionada', text)
 
 def ErroPesquisaVazio():
     showerror('Nada a pesquisar', 'A caixa de pesquisa está vazia. Digite algo.')
 
-def AvisoSemResultados():
+def ErroArquivoGrande():
+    showerror('Arquivo grande', 'Arquivo muito grande para ser aberto pelo programa.')
+
+def AvisoArquivoNaoSelecionado():
+    showinfo('Nenhum arquivo selecionado', 'Nenhum arquivo foi selecionado no explorador de arquivos.')
+
+def AvisoNenhumResultado():
     showinfo('Nenhum resultado', 'Nenhum resultado foi encontrado para a pesquisa.')
 
-def ErroTipoDePesquisa():
-    showerror('Nenhum tipo de pesquisa selecionado', 'Selecione o tipo de pesquisa que deseja fazer.')
+def ErroInesperado():
+    showerror('Erro inesperado', 'Ops! Ocorreu um erro.')

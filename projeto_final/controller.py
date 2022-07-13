@@ -3,7 +3,7 @@ from Excecoes import *
 from interface import *
 from modelo import *
 from data import *
-from tkinter.messagebox import showerror
+from pandas.errors import ParserError
 
 class Controller:
     def __init__(self):
@@ -55,19 +55,20 @@ class Controller:
         cb = self.view.widgets['cb']
         cb.bind('<<ComboboxSelected>>', self.cb_opcao)
 
-    def cb_opcao(self, event):
+    def cb_opcao(self, event=None):
         cb = self.view.widgets['cb']
         l5 = self.view.widgets['tipo_pesquisa']
         l5.texto = ''
+
         if cb.texto == '':
             l5.texto = 'Escolha o tipo de pesquisa...'
-        elif cb.texto == 'titulo':
+        if cb.texto == 'titulo':
             l5.texto = 'Digite o título na barra de pesquisa.'
-        elif cb.texto == 'canal':
+        if cb.texto == 'canal':
             l5.texto = 'Digite o nome do canal na barra de pesquisa.'
-        elif cb.texto == 'periodo':
+        if cb.texto == 'periodo':
             l5.texto = 'Digite: "dd/mm/aaaa - dd/mm/aaaa"'
-        elif cb.texto == 'categoria':
+        if cb.texto == 'categoria':
             s = 'Digite uma das categorias:\n'
             for i in self.model.categorias:
                 s += f'{i}\n'
@@ -145,97 +146,121 @@ class Controller:
 
     def mostrar_grafico(self):
         rb = self.view.widgets['rb']
-        if not self.arquivo:
+        try:
+            if not self.arquivo:
+                raise ArquivoNaoSelecionado()
+            if rb.texto == '':
+                raise OpcaoNaoSelecionada('Algum dos tipos de gráficos deve ser selecionado.')
+            if rb.texto == 'assistidos':
+                self.model.mostra_mais_assistidos()
+            if rb.texto == 'likes':
+                self.model.mostra_mais_likes()
+            if rb.texto == 'comentários':
+                self.model.mostra_mais_comentarios()
+        except ArquivoNaoSelecionado:
             ErroArquivoNaoSelecionado()
-        elif rb.texto == '':
-            ErroGraficoSelecao()
-        elif rb.texto == 'assistidos':
-            self.model.mostra_mais_assistidos()
-        elif rb.texto == 'likes':
-            self.model.mostra_mais_likes()
-        elif rb.texto == 'comentários':
-            self.model.mostra_mais_comentarios()
+        except OpcaoNaoSelecionada as err:
+            ErroOpcaoNaoSelecionada(err)
+        except ExcecaoSistema:
+            ErroInesperado()
         
     def importar_dados(self):
         tipo_de_arq = ExploradorDeArquivo.tipos_arq
-        self.arquivo = ExploradorDeArquivo(tipo_de_arq)
-
-        if self.arquivo.texto:
-            nome_do_arq = self.arquivo.texto
-            exibe_nome_arquivo = self.view.widgets['arquivo']
-            exibe_nome_arquivo.texto = nome_do_arq
+        exp_arquivo = ExploradorDeArquivo(tipo_de_arq)
+        nome_do_arq = exp_arquivo.texto
+        try:
+            if not exp_arquivo.texto:
+                raise ArquivoNaoSelecionado()
             m = BancoDadosYT(nome_do_arq)
             self.model = m
+            self.arquivo = exp_arquivo
+            exibe_nome_arquivo = self.view.widgets['arquivo']
+            exibe_nome_arquivo.texto = nome_do_arq
             self.insere_dados()
-        else:
+        except ArquivoNaoSelecionado:
             AvisoArquivoNaoSelecionado()
-            self.arquivo = None
+        except ParserError:
+            ErroArquivoGrande()
+        except ExcecaoSistema:
+            ErroInesperado()
 
     def pesquisar(self):
         pesquisa = self.view.widgets['barra_pesquisa'].get()
         cb = self.view.widgets['cb']
-        if not self.arquivo:
-            ErroArquivoNaoSelecionado()
-        elif pesquisa == '':
-            ErroPesquisaVazio()
-        elif cb.texto == '':
-            ErroTipoDePesquisa()
-        else:
+        try:
+            if not self.arquivo:
+                raise ArquivoNaoSelecionado()
+            if pesquisa == '':
+                raise PesquisaVazio()
+            if cb.texto == '':
+                raise OpcaoNaoSelecionada('Algum dos tipos de pesquisa deve ser selecionado.')
             self.insere_dados()
+        except ArquivoNaoSelecionado:
+            ErroArquivoNaoSelecionado()
+        except PesquisaVazio:
+            ErroPesquisaVazio()
+        except OpcaoNaoSelecionada as err:
+            ErroOpcaoNaoSelecionada(err)
+        except:
+            ErroInesperado()
 
     def insere_dados(self):
         self.reseta_ordenacoes()
         cb = self.view.widgets['cb']
-
         pesquisa = self.view.widgets['barra_pesquisa'].get()
-        if not self.arquivo:
-            ErroArquivoNaoSelecionado()
-            return None
-        elif cb.texto == '':
-            res = self.model.todos()
-        elif cb.texto == 'titulo':
-            res = self.model.busca_por_titulo(pesquisa)
-        elif cb.texto == 'canal':
-            res = self.model.busca_por_canal(pesquisa)
-        elif cb.texto == 'categoria':
-            res = self.model.busca_por_categoria(pesquisa)
-        elif cb.texto == 'periodo':
-            p = Periodo(pesquisa)
-            di = p.data_inicial()
-            df = p.data_final()
-            res = self.model.busca_por_periodo(di, df)
-        if not res:
-            AvisoSemResultados()
-        else:
+        try:
+            if not self.arquivo:
+                raise ArquivoNaoSelecionado()
+            if cb.texto == '':
+                res = self.model.todos()
+            if cb.texto == 'titulo':
+                res = self.model.busca_por_titulo(pesquisa)
+            if cb.texto == 'canal':
+                res = self.model.busca_por_canal(pesquisa)
+            if cb.texto == 'categoria':
+                res = self.model.busca_por_categoria(pesquisa)
+            if cb.texto == 'periodo':
+                p = Periodo(pesquisa)
+                di = p.data_inicial()
+                df = p.data_final()
+                res = self.model.busca_por_periodo(di, df)
+            if not res:
+                raise NadaEncontrado()
             self.qtd_mostrando = 0
             self.view.tv.limpa()
             self.lista = res
             self.fila = res.copy()
             self.adiciona_na_lista()
-
             exibe_tam_lista = self.view.widgets['tam_lista']
             exibe_tam_lista.texto = f'Tamanho da lista: {len(res)}'
+        except ArquivoNaoSelecionado:
+            ErroArquivoNaoSelecionado()
+        except NadaEncontrado:
+            AvisoNenhumResultado()
+        except:
+            ErroInesperado()
 
-    def adiciona_na_lista(self, event=None):
-        if self.arquivo:
-            res = self.fila
-            self.qtd_mostrando
-            for i in range(len(res)):
+    def adiciona_na_lista(self):
+        lista = self.fila
+        try:
+            if not self.arquivo:
+                raise ArquivoNaoSelecionado
+            for i in range(len(lista)):
                 if i < 5:
-                    titulo = res[i].titulo
-                    canal = res[i].canal
-                    views = res[i].cont_views
-                    likes = res[i].likes
-                    self.view.tv.insere('', tk.END, values=[titulo, canal, views, likes])
+                    video = lista[i]
+                    l = [video.titulo, video.canal, video.cont_views, video.likes]
+                    self.view.tv.insere('', tk.END, values=l)
                     self.qtd_mostrando += 1
-            for i in range(len(res)):
+            for i in range(len(lista)):
                 if i < 5:
-                    res.pop(0)
+                    lista.pop(0)
             n = self.qtd_mostrando
             exibe_mostrando = self.view.widgets['mostrando']
             exibe_mostrando.texto = f'Mostrando: {n}'
-        else:
+        except ArquivoNaoSelecionado:
             ErroArquivoNaoSelecionado()
+        except:
+            ErroInesperado()
     
 def main():
     v = BuscadorDeVideos()
