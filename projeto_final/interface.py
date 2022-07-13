@@ -29,11 +29,7 @@ class BuscadorDeVideos(tk.Tk):
 
         # Dados
         datas = Frame(self, (1, 0), bd=10, relief=tk.SUNKEN, sticky='NSWE')
-        nb = Notebook(datas, (0, 0), sticky='NSWE')
-        tabela = Frame(nb, (0, 0), sticky='NSWE')
-        grafico = Frame(nb, (0, 0), sticky='NSWE')
-        nb.adicionar_frame(tabela, 'Resultados')
-        nb.adicionar_frame(grafico, 'Gráficos')
+        tabela = Frame(datas, (0, 0), sticky='NSWE')
         c, t, n = self._config_tv()
         self.tv = TreeView(tabela, c, t, n, (0, 0), sticky='NSWE')
         infos = Frame(tabela, (2, 0), sticky='NSWE')
@@ -125,7 +121,7 @@ class BuscadorDeVideos(tk.Tk):
     def _config_tv(self):
         c = ['col0', 'col1', 'col2', 'col3']
         t = ['Titulo', 'Canal', 'Views', 'Likes']
-        n = [400, 200, 100, 100]
+        n = [200, 200, 100, 100]
         return c, t, n
 
     def _config_configs(self, configs, frame_pad, reset):

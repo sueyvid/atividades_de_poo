@@ -1,7 +1,5 @@
 from tkinter.messagebox import showerror, showinfo
 
-from matplotlib.pyplot import show
-
 class ExcecaoSistema(Exception):
     '''Classe de exceções do sistema'''
     pass
@@ -47,11 +45,17 @@ def ErroPesquisaVazio():
 def ErroArquivoGrande():
     showerror('Arquivo grande', 'Arquivo muito grande para ser aberto pelo programa.')
 
+def ErroPeriodoIncorreto():
+    showerror('Perído incorreto', 'Você digitou o perído de forma incorreta tente no formato: "dd/mm/aaaa - dd/mm/aaaa"')
+
 def AvisoArquivoNaoSelecionado():
     showinfo('Nenhum arquivo selecionado', 'Nenhum arquivo foi selecionado no explorador de arquivos.')
 
 def AvisoNenhumResultado():
     showinfo('Nenhum resultado', 'Nenhum resultado foi encontrado para a pesquisa.')
 
+def ErroNoSistema():
+    showerror('Erro inesperado', 'Ops! Ocorreu um erro no sistema.')
+
 def ErroInesperado():
-    showerror('Erro inesperado', 'Ops! Ocorreu um erro.')
+    showerror('Erro inesperado', 'Ops! Ocorreu um erro fora do sistema.')

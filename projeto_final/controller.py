@@ -3,7 +3,7 @@ from Excecoes import *
 from interface import *
 from modelo import *
 from data import *
-from pandas.errors import ParserError
+from pandas.errors import ParserError, OutOfBoundsDatetime
 
 class Controller:
     def __init__(self):
@@ -59,20 +59,28 @@ class Controller:
         cb = self.view.widgets['cb']
         l5 = self.view.widgets['tipo_pesquisa']
         l5.texto = ''
-
-        if cb.texto == '':
-            l5.texto = 'Escolha o tipo de pesquisa...'
-        if cb.texto == 'titulo':
-            l5.texto = 'Digite o título na barra de pesquisa.'
-        if cb.texto == 'canal':
-            l5.texto = 'Digite o nome do canal na barra de pesquisa.'
-        if cb.texto == 'periodo':
-            l5.texto = 'Digite: "dd/mm/aaaa - dd/mm/aaaa"'
-        if cb.texto == 'categoria':
-            s = 'Digite uma das categorias:\n'
-            for i in self.model.categorias:
-                s += f'{i}\n'
-            l5.texto = s
+        try:
+            if not self.arquivo:
+                raise ArquivoNaoSelecionado()
+            if cb.texto == '':
+                l5.texto = 'Escolha o tipo de pesquisa...'
+            if cb.texto == 'titulo':
+                l5.texto = 'Digite o título na barra de pesquisa.'
+            if cb.texto == 'canal':
+                l5.texto = 'Digite o nome do canal na barra de pesquisa.'
+            if cb.texto == 'periodo':
+                l5.texto = 'Digite: "dd/mm/aaaa - dd/mm/aaaa"'
+            if cb.texto == 'categoria':
+                s = 'Digite uma das categorias:\n'
+                for i in self.model.categorias:
+                    s += f'{i}\n'
+                l5.texto = s
+        except ArquivoNaoSelecionado:
+            ErroArquivoNaoSelecionado()
+        except ExcecaoSistema:
+            ErroNoSistema()
+        except Exception:
+            ErroInesperado()
 
     def reseta_ordenacoes(self):
         self.view.tv.heading('col0', text='Titulo')
@@ -162,6 +170,8 @@ class Controller:
         except OpcaoNaoSelecionada as err:
             ErroOpcaoNaoSelecionada(err)
         except ExcecaoSistema:
+            ErroNoSistema()
+        except Exception:
             ErroInesperado()
         
     def importar_dados(self):
@@ -176,12 +186,14 @@ class Controller:
             self.arquivo = exp_arquivo
             exibe_nome_arquivo = self.view.widgets['arquivo']
             exibe_nome_arquivo.texto = nome_do_arq
-            self.insere_dados()
+            self.resetar()
         except ArquivoNaoSelecionado:
             AvisoArquivoNaoSelecionado()
         except ParserError:
             ErroArquivoGrande()
         except ExcecaoSistema:
+            ErroNoSistema()
+        except Exception:
             ErroInesperado()
 
     def pesquisar(self):
@@ -201,7 +213,9 @@ class Controller:
             ErroPesquisaVazio()
         except OpcaoNaoSelecionada as err:
             ErroOpcaoNaoSelecionada(err)
-        except:
+        except ExcecaoSistema:
+            ErroNoSistema()
+        except Exception:
             ErroInesperado()
 
     def insere_dados(self):
@@ -237,7 +251,11 @@ class Controller:
             ErroArquivoNaoSelecionado()
         except NadaEncontrado:
             AvisoNenhumResultado()
-        except:
+        except OutOfBoundsDatetime:
+            ErroPeriodoIncorreto()
+        except ExcecaoSistema:
+            ErroNoSistema()
+        except Exception:
             ErroInesperado()
 
     def adiciona_na_lista(self):
@@ -259,7 +277,9 @@ class Controller:
             exibe_mostrando.texto = f'Mostrando: {n}'
         except ArquivoNaoSelecionado:
             ErroArquivoNaoSelecionado()
-        except:
+        except ExcecaoSistema:
+            ErroNoSistema()
+        except Exception:
             ErroInesperado()
     
 def main():
